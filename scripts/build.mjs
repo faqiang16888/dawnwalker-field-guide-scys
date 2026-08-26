@@ -30,6 +30,7 @@ function layout({ title, description, body, current = "" }) {
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(description)}">
   <meta name="robots" content="index,follow">
+  <meta name="google-site-verification" content="uHlug_9Xpm2pQeDhYHWRs-XvRe05JbUIeki7S45kywI">
   <link rel="canonical" href="${siteOrigin}${pathFor(current)}">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/styles.css">
