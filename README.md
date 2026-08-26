@@ -18,4 +18,4 @@ Open <http://localhost:4173>.
 - Unknown pre-release details stay explicitly unconfirmed.
 - `src/site-data.mjs` is the content source of truth; `scripts/build.mjs` generates `dist/`.
 
-Before a public deployment, replace the placeholder origin in `sitemap.xml`/canonical generation with the final domain.
+The production origin defaults to `https://dawnwalker-field-guide-scys.vercel.app` and can be overridden at build time with `SITE_ORIGIN`.

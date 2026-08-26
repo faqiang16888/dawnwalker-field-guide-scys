@@ -5,6 +5,7 @@ import { guideGroups, pages, sources } from "../src/site-data.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "dist");
+const siteOrigin = (process.env.SITE_ORIGIN || "https://dawnwalker-field-guide-scys.vercel.app").replace(/\/$/, "");
 const bySlug = Object.fromEntries(pages.map((page) => [page.slug, page]));
 
 const esc = (value) => String(value).replace(/[&<>\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]);
@@ -29,7 +30,7 @@ function layout({ title, description, body, current = "" }) {
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(description)}">
   <meta name="robots" content="index,follow">
-  <link rel="canonical" href="${pathFor(current)}">
+  <link rel="canonical" href="${siteOrigin}${pathFor(current)}">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/styles.css">
 </head>
@@ -84,6 +85,6 @@ await writePage("", renderHome());
 await writePage("guides", renderGuides());
 for (const page of pages) await writePage(page.slug, renderPage(page));
 await writeFile(join(out, "robots.txt"), "User-agent: *\nAllow: /\n");
-await writeFile(join(out, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", "guides", ...pages.map((p) => p.slug)].map((slug) => `<url><loc>https://example.com${pathFor(slug)}</loc></url>`).join("")}</urlset>`);
+await writeFile(join(out, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", "guides", ...pages.map((p) => p.slug)].map((slug) => `<url><loc>${siteOrigin}${pathFor(slug)}</loc></url>`).join("")}</urlset>`);
 
 console.log(`Built ${pages.length + 2} pages in ${out}`);
