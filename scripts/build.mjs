@@ -6,6 +6,7 @@ import { guideGroups, pages, sources } from "../src/site-data.mjs";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "dist");
 const siteOrigin = (process.env.SITE_ORIGIN || "https://dawnwalker-field-guide-scys.vercel.app").replace(/\/$/, "");
+const measurementId = "G-H62JLJ81N5";
 const bySlug = Object.fromEntries(pages.map((page) => [page.slug, page]));
 
 const esc = (value) => String(value).replace(/[&<>\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]);
@@ -31,12 +32,27 @@ function layout({ title, description, body, current = "" }) {
   <meta name="description" content="${esc(description)}">
   <meta name="robots" content="index,follow">
   <meta name="google-site-verification" content="uHlug_9Xpm2pQeDhYHWRs-XvRe05JbUIeki7S45kywI">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=${measurementId}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    let analyticsConsent = "denied";
+    try { analyticsConsent = localStorage.getItem("analytics-consent") === "granted" ? "granted" : "denied"; } catch {}
+    gtag("consent", "default", {
+      analytics_storage: analyticsConsent,
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied"
+    });
+    gtag("js", new Date());
+    gtag("config", "${measurementId}", { send_page_view: analyticsConsent === "granted" });
+  </script>
   <link rel="canonical" href="${siteOrigin}${pathFor(current)}">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>${nav}${body}
-  <footer class="footer"><div class="shell footer-grid"><p>Dawnwalker Field Guide · Independent, source-linked reference.</p><p>Fact check: August 26, 2026 · Not affiliated with Rebel Wolves or Bandai Namco.</p></div></footer>
+  <footer class="footer"><div class="shell footer-grid"><p>Dawnwalker Field Guide · Independent, source-linked reference.</p><p><a href="/privacy/">Privacy & analytics</a> · <button class="privacy-action" type="button">Privacy choices</button><br>Fact check: August 26, 2026 · Not affiliated with Rebel Wolves or Bandai Namco.</p></div></footer>
   <script src="/assets/app.js" defer></script>
 </body>
 </html>`;
@@ -70,6 +86,20 @@ function renderHome() {
   return layout({ title: "The Blood of Dawnwalker Guide — Release, Gameplay & Answers", description: "A source-backed guide to The Blood of Dawnwalker release date, gameplay, PC requirements, time system, characters and vampire powers.", body });
 }
 
+function renderPrivacy() {
+  const body = `<main>
+    <section class="hero"><div class="shell"><p class="eyebrow">Privacy & analytics</p><h1>A small site with a small data footprint.</h1><p class="hero-copy">This page explains the optional analytics used on Dawnwalker Field Guide and how to change your choice.</p></div></section>
+    <section class="section"><div class="shell article"><article class="prose">
+      <section><h2>What is collected</h2><p>With your permission, this site uses Google Analytics 4 to measure page views, scrolls, outbound clicks and basic device or geographic aggregates. The site does not contain account registration, payment or contact forms, and it is not designed to send names, email addresses or other directly identifying information to Google Analytics.</p></section>
+      <section><h2>Your choice</h2><p>Analytics storage is denied by default. Google Analytics page-view collection begins only after you choose “Allow analytics” in the privacy notice. You can decline without losing access to any guide, and you can reopen Privacy choices from the footer at any time.</p></section>
+      <section><h2>How the data is used</h2><p>Analytics is used only to understand whether the guide is being visited and which pages are useful enough to maintain or expand. Advertising storage, ad user data and ad personalization remain disabled in the site configuration.</p></section>
+      <section><h2>Third-party processing</h2><p>Google processes permitted analytics data under its own terms and privacy policy. Learn more in <a href="https://policies.google.com/privacy">Google's Privacy Policy</a> and <a href="https://policies.google.com/technologies/partner-sites">How Google uses information from sites that use its services</a>.</p></section>
+      <div class="notice">This notice describes the configuration deployed on August 26, 2026. It is an operational disclosure, not a claim of legal advice or universal regulatory compliance.</div>
+    </article><aside class="source-box"><h2>Current setup</h2><ul><li>GA4 measurement ID: ${measurementId}</li><li>Consent default: denied</li><li>Advertising signals: denied</li><li>Enhanced measurement: enabled after consent</li></ul><small>Use the footer's Privacy choices button to change the stored preference.</small></aside></div></section>
+  </main>`;
+  return layout({ title: "Privacy & Analytics — Dawnwalker Field Guide", description: "How Dawnwalker Field Guide uses optional Google Analytics with consent denied by default.", body, current: "privacy" });
+}
+
 await rm(out, { recursive: true, force: true });
 await mkdir(join(out, "assets"), { recursive: true });
 await cp(join(root, "src/styles.css"), join(out, "assets/styles.css"));
@@ -84,8 +114,9 @@ async function writePage(route, html) {
 
 await writePage("", renderHome());
 await writePage("guides", renderGuides());
+await writePage("privacy", renderPrivacy());
 for (const page of pages) await writePage(page.slug, renderPage(page));
 await writeFile(join(out, "robots.txt"), "User-agent: *\nAllow: /\n");
-await writeFile(join(out, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", "guides", ...pages.map((p) => p.slug)].map((slug) => `<url><loc>${siteOrigin}${pathFor(slug)}</loc></url>`).join("")}</urlset>`);
+await writeFile(join(out, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", "guides", "privacy", ...pages.map((p) => p.slug)].map((slug) => `<url><loc>${siteOrigin}${pathFor(slug)}</loc></url>`).join("")}</urlset>`);
 
-console.log(`Built ${pages.length + 2} pages in ${out}`);
+console.log(`Built ${pages.length + 3} pages in ${out}`);
